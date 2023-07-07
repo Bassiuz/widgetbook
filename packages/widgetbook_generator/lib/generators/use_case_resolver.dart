@@ -43,11 +43,13 @@ class UseCaseResolver extends GeneratorForAnnotation<UseCase> {
 
     final componentDefinitionPath = typeValue.element!.librarySource!.fullName;
 
+    String importStatement = _convertAssetImport(importStatement: element.importStatement);
+
     final data = WidgetbookUseCaseData(
       name: element.name!,
       useCaseName: useCaseName,
       componentName: componentName,
-      importStatement: element.importStatement,
+      importStatement: importStatement,
       componentImportStatement: typeElement.importStatement,
       dependencies: typeElement.dependencies,
       componentDefinitionPath: componentDefinitionPath,
@@ -56,5 +58,23 @@ class UseCaseResolver extends GeneratorForAnnotation<UseCase> {
     );
 
     return [data].toJson();
+  }
+
+  String _convertAssetImport({required String importStatement, String widgetbookLocationName = "/test/"}) {
+    if (!importStatement.startsWith("asset:")) return importStatement;
+
+    String strippedImportStatement = importStatement.substring(6);
+
+    int dotCount = RegExp("/").allMatches(widgetbookLocationName).length;
+
+    String result = strippedImportStatement;
+
+    // add "../" for each time we have dotcount to result
+
+    for (int i = 0; i < dotCount; i++) {
+      result = "../" + result;
+    }
+
+    return result;
   }
 }
